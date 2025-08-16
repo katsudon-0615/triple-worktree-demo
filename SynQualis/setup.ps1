@@ -1,3 +1,8 @@
+[CmdletBinding()]
+param(
+	[switch]$AutoInit,
+	[switch]$VerboseMode
+)
 #requires -Version 7.0
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -148,10 +153,26 @@ Write-Info (& node --version)
 $pm = Detect-PM
 Write-Info "Package Manager: $pm"
 
-# Git ルート検出
+# Git ルート検出 / 必要なら初期化
+$gitRoot = $null
 try { $gitRoot = (& git rev-parse --show-toplevel 2>$null).Trim() } catch { $gitRoot = $null }
-if (-not $gitRoot) { Fail 'このスクリプトは Git リポジトリ配下で実行してください（git rev-parse でルートを特定できませんでした）。' }
+if (-not $gitRoot) {
+	if ($AutoInit) {
+		Write-Info 'Git リポジトリが見つかりません。ここで初期化します。'
+		& git init | Out-Null
+		& git add -A | Out-Null
+		& git -c user.name='auto' -c user.email='auto@local' commit -m 'init' | Out-Null
+		$gitRoot = (& git rev-parse --show-toplevel 2>$null).Trim()
+	} else {
+		Fail 'Git リポジトリ直下で実行してください。もしくは -AutoInit を指定してください。'
+	}
+}
 if ((Get-Location).Path -ne $gitRoot) { Write-Info "Git ルートへ移動: $gitRoot"; Set-Location $gitRoot }
+
+# 基準リビジョン: origin/main 優先、無ければ HEAD
+$baseRef = 'HEAD'
+try { $r = (& git ls-remote --heads origin main 2>$null); if ($r -and $r.Trim().Length -gt 0) { $baseRef = 'origin/main' } } catch {}
+Write-Info "Base ref: $baseRef"
 
 # ===== 最新化 =====
 Write-Info 'git fetch --all --prune 実行'
@@ -166,9 +187,9 @@ $pathNow  = Join-Path $layersRoot 'now'
 $pathPast = Join-Path $layersRoot 'past'
 $pathNext = Join-Path $layersRoot 'next'
 
-Ensure-Branch 'z/now'  'origin/main'
-Ensure-Branch 'z/past' 'origin/main'
-Ensure-Branch 'z/next' 'origin/main'
+Ensure-Branch 'z/now'  $baseRef
+Ensure-Branch 'z/past' $baseRef
+Ensure-Branch 'z/next' $baseRef
 Ensure-Worktree $pathNow  'z/now'
 Ensure-Worktree $pathPast 'z/past'
 Ensure-Worktree $pathNext 'z/next'

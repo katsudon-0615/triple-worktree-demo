@@ -219,8 +219,8 @@ $parent = Split-Path -Parent $repoRoot
 $pathA = Join-Path $parent 'repo-feature-a'
 $pathB = Join-Path $parent 'repo-feature-b'
 
-Ensure-Branch 'feature/a' 'origin/main'
-Ensure-Branch 'feature/b' 'origin/main'
+Ensure-Branch 'feature/a' 'HEAD'
+Ensure-Branch 'feature/b' 'HEAD'
 Ensure-Worktree $pathA 'feature/a'
 Ensure-Worktree $pathB 'feature/b'
 
