@@ -1,0 +1,9 @@
+{
+	"mcpSettings": {
+		"security": {
+			"deny_cloud": true
+		}
+	}
+}
+
+

@@ -1,0 +1,11 @@
+{
+	"version": 1,
+	"title": "Demo WBS",
+	"steps": [
+		{ "step": 1, "name": "準備", "desc": "環境とログの初期化" },
+		{ "step": 2, "name": "実行", "desc": "短時間のコマンド実行" },
+		{ "step": 3, "name": "監査", "desc": "ログとWBSの突合" }
+	]
+}
+
+
