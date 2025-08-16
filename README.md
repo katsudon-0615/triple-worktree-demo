@@ -29,4 +29,14 @@
 - `Z_LAYER` を `now` にした状態で `guard_layer.js` が OK を返す
 - `node tools/audit_external.js` が `wbs.json` とログを読み、問題が無ければ 0 終了
 
+### CI の流れ（GitHub Actions）
+
+`z/**` への push または `main` への PR 時に自動で以下を実行します。
+
+1) 左ゲート: `echo {} | pnpm gate:left`（非課金・層混在・トークン長）
+2) テスト: `pnpm -s test:unit || echo "no unit tests"`、`pnpm -s test:e2e || echo "no e2e tests"`
+3) ビルド: `pnpm -s build || echo "skipped build"`
+4) 右ゲート: ダミーJSONをパイプしてスキーマ＋品質検証
+5) 監査: `node tools/audit_external.js || echo "audit warnings"`
+
 

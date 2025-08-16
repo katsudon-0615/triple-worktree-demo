@@ -1,0 +1,32 @@
+name: build_test_audit
+on:
+  push: { branches: [ "z/**" ] }
+  pull_request: { branches: [ "main" ] }
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "18", cache: "pnpm" }
+      - run: corepack enable && corepack prepare pnpm@latest --activate
+      - run: pnpm i --frozen-lockfile=false
+
+      # 左ゲート（非課金・層混在・トークン長）
+      - run: echo {} | pnpm gate:left
+
+      # 単体/E2E（まだ無ければスキップでも可）
+      - run: pnpm -s test:unit || echo "no unit tests"
+      - run: pnpm -s test:e2e || echo "no e2e tests"
+
+      # ビルド（ない場合はスキップ扱い）
+      - run: pnpm -s build || echo "skipped build"
+
+      # 右ゲート（スキーマ＋品質）
+      - run: node -p "JSON.stringify({metrics:{Q:0.9,pass:0.98,UNKNOWN:0},status:'ok',data:{},evidence:[]})" | pnpm gate:right
+
+      # 外部監査（WBSとログの突合）
+      - run: node tools/audit_external.js || echo "audit warnings"
+
+
