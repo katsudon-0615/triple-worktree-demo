@@ -1,0 +1,57 @@
+name: DAG CI
+
+on:
+  push:
+    branches:
+      - main
+      - "z/**"
+  pull_request:
+    branches:
+      - main
+      - "z/**"
+  workflow_dispatch:
+
+jobs:
+  pipeline:
+    name: Gate → Test → Build → Gate → Audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SynQualis
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Gate Left
+        run: pnpm gate:left
+
+      - name: Unit tests
+        run: pnpm run test:unit --if-present
+
+      - name: E2E tests
+        run: pnpm run test:e2e --if-present
+
+      - name: Build
+        run: pnpm run build --if-present
+
+      - name: Gate Right
+        run: pnpm gate:right
+
+      - name: External Audit
+        run: node tools/audit_external.js
+
+
