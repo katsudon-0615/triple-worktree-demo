@@ -1,0 +1,18 @@
+﻿# Dependencies
+node_modules/
+
+# Logs and runtime locks
+logs/
+.lock_runtime
+
+# OS/editor
+.DS_Store
+.vscode/
+
+# Build outputs
+.next/
+dist/
+build/
+
+# Env files
+.env*
