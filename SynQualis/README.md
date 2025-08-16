@@ -75,3 +75,13 @@ bash tools/recover.sh
   - 証拠（ログ/出力）を添付
   - `UNKNOWN=0` を満たすこと（右ゲート基準）
   - CI が緑（`build_test_audit`）であること
+
+## 運用早見表
+
+- Default/保護ブランチ: `main`（直push不可、PR+CI必須）
+- 作業: `z/now` / `z/past` / `z/next`
+- CI: `.github/workflows/dag.yml` → 必須チェック `build_test_audit`
+- 基本手順:
+  1) 作業ブランチ更新 → PR (to main)
+  2) Actions 成功を確認
+  3) マージ
