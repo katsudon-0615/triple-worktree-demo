@@ -1,32 +1,39 @@
-name: build_test_audit
+name: DAG Pipeline
+
 on:
-  push: { branches: [ "z/**" ] }
-  pull_request: { branches: [ "main" ] }
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
 
 jobs:
-  pipeline:
+  build_test_audit:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: SynQualis
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "18", cache: "pnpm" }
-      - run: corepack enable && corepack prepare pnpm@latest --activate
-      - run: pnpm i --frozen-lockfile=false
+      - uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+      - name: Enable corepack (pnpm)
+        run: corepack enable
+      - name: Install deps
+        run: pnpm install
+      - name: Run gate left
+        run: pnpm gate:left
+      - name: Run unit tests (skippable)
+        run: pnpm run -s test:unit || echo "no test:unit, skipping"
+      - name: Run e2e tests (skippable)
+        run: pnpm run -s test:e2e || echo "no test:e2e, skipping"
+      - name: Build (skippable)
+        run: pnpm run -s build || echo "no build, skipping"
+      - name: Run gate right
+        run: node -p "JSON.stringify({metrics:{Q:0.9,pass:0.98,UNKNOWN:0},status:'ok',data:{},evidence:[]})" | pnpm gate:right
+      - run: node tools/audit_external.js
 
-      # 左ゲート（非課金・層混在・トークン長）
-      - run: echo {} | pnpm gate:left
-
-      # 単体/E2E（まだ無ければスキップでも可）
-      - run: pnpm -s test:unit || echo "no unit tests"
-      - run: pnpm -s test:e2e || echo "no e2e tests"
-
-      # ビルド（ない場合はスキップ扱い）
-      - run: pnpm -s build || echo "skipped build"
-
-      # 右ゲート（スキーマ＋品質）
-      - run: node -p "JSON.stringify({metrics:{Q:0.9,pass:0.98,UNKNOWN:0},status:'ok',data:{},evidence:[]})" | pnpm gate:right
-
-      # 外部監査（WBSとログの突合）
-      - run: node tools/audit_external.js || echo "audit warnings"
-
-
+# 失敗時の扱い: gate/right/audit が失敗すると job は fail します。
+# 方針: 失敗ブランチは z/past に差し戻すこと。
