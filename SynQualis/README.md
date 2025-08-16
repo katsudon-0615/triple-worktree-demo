@@ -57,3 +57,21 @@ pnpm gate:left && pnpm build && pnpm gate:right
 ```bash
 bash tools/recover.sh
 ```
+
+## ブランチ保護
+
+- 対象: `main`
+- 設定例（GitHub → Settings → Branches → Branch protection rules）
+  - Require a pull request before merging（最低 1 承認）
+  - Require status checks to pass（`build_test_audit` を必須に）
+  - （任意）Require linear history
+  - Allow force pushes: Off
+
+## PR運用
+
+- フロー: `z/now`/`z/past`/`z/next` → `main` に対して PR を作成
+- チェックポイント:
+  - 非課金APIのみ（キーは `__DISABLED__`）
+  - 証拠（ログ/出力）を添付
+  - `UNKNOWN=0` を満たすこと（右ゲート基準）
+  - CI が緑（`build_test_audit`）であること

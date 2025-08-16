@@ -39,3 +39,26 @@
 - 主要コマンド：`pnpm gate:left` / `pnpm gate:right`、`node tools/audit_external.js`
 - `pnpm run test:unit|test:e2e|build` は `--if-present` で存在時のみ実行
 - いずれかのステップが失敗すればジョブは失敗
+
+---
+
+## PR作成手順（z/now/past/next → main）
+1. 作業ブランチ（例: `z/past/feature-xxx`）で変更をコミット
+2. `origin` へ push（例: `git push -u origin z/past/feature-xxx`）
+3. GitHub 上で `main` 宛に PR を作成
+4. CI（`build_test_audit`）が完了するまで待機し、レビュー依頼
+5. 最低 1 承認後、Squash or Merge（linear history を推奨）
+
+## CIが赤のときの対応
+- どのフェーズで失敗したかを特定（Left Gate / Test / Build / Right Gate / Audit）
+- 対応ポリシー：該当フェーズへ差し戻し＋1分/3分ルール
+  - 1分：原因仮説の特定と最小修正
+  - 3分：緑化できなければ z/* に封じ込め、別PRで追跡
+
+## ブランチ命名規則とレビューポイント
+- 命名規則：`z/<layer>/<type>-<topic>`（例: `z/past/feat-ci-dag`）
+- レビュー観点：
+  - 非課金（外部APIキーは `__DISABLED__`）
+  - 証拠（ログ/スクショ/生成物）を提示
+  - `UNKNOWN=0`（右ゲート基準）を満たす
+  - 逸脱は z/past へ封じ込め、復旧手順の明記
