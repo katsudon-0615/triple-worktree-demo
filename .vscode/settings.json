@@ -1,0 +1,14 @@
+{
+	"files.autoSave": "off",
+	"editor.formatOnSave": false,
+	"cursor.backgroundTasks.enabled": false,
+	"cSpell.words": [
+		"dotenv",
+		"nodemon",
+		"pkgs",
+		"synqualis",
+		"vite",
+		"worktree",
+		"worktrees"
+	]
+}

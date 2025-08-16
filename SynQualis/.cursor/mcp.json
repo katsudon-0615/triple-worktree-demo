@@ -1,0 +1,38 @@
+{
+	"mcpServers": {
+		"router": {
+			"command": "node",
+			"args": ["tools/mcp-router.js"]
+		}
+	},
+	"mcpSettings": {
+		"route": {
+			"rules": [
+				{ "when": { "task": "code" }, "to": "local-deepseek6.7b" },
+				{ "when": { "need_speed": true, "len_lte": 1000 }, "to": "local-mistral7b" },
+				{ "when": { "task": "summarize", "len_lte": 4000 }, "to": "local-llama3.1-8b" },
+				{ "when": { "task": "reason", "len_gt": 4000 }, "to": "local-qwen2-14b" },
+				{ "when": { "need_precision": true }, "to": "lan-120b" },
+				{ "when": { "len_gt": 8000 }, "to": "lan-120b" },
+				{ "when": { "otherwise": true }, "to": "local-20b" }
+			],
+			"targets": {
+				"local-deepseek6.7b": { "baseUrl": "http://127.0.0.1:11435" },
+				"local-mistral7b":    { "baseUrl": "http://127.0.0.1:11434" },
+				"local-llama3.1-8b":  { "baseUrl": "http://127.0.0.1:11436" },
+				"local-qwen2-14b":    { "baseUrl": "http://127.0.0.1:11438" },
+				"local-20b":          { "baseUrl": "http://127.0.0.1:11439" },
+				"lan-20b":            { "baseUrl": "http://lan-gpu:8000" },
+				"lan-120b":           { "baseUrl": "http://lan-gpu:8012" }
+			}
+		},
+		"guardrails": {
+			"schema": "prompts/schema.json",
+			"evidence_required": true
+		},
+		"security": {
+			"allowlist": ["127.0.0.1", "lan-gpu.local", "lan-gpu"],
+			"deny_cloud": true
+		}
+	}
+}

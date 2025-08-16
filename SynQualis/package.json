@@ -1,0 +1,23 @@
+{
+	"name": "synqualis",
+	"private": true,
+	"version": "0.0.0",
+	"scripts": {
+		"dev:now":  "cross-env NODE_ENV=development dotenv -e .env.now next dev",
+		"dev:past": "cross-env NODE_ENV=development dotenv -e .env.past next dev",
+		"dev:next": "cross-env NODE_ENV=development dotenv -e .env.next next dev",
+		"llm:mistral7b": "ollama serve --port 11434 & exit 0",
+		"llm:deepseek6":  "node tools/start_local.js deepseek-coder-6.7b 11435",
+		"llm:llama3_8b":  "node tools/start_local.js llama-3.1-8b 11436",
+		"llm:qwen2_14b":  "node tools/start_local.js qwen2-14b 11438",
+		"llm:gptoss20b":  "node tools/start_local.js gpt-oss-20b 11439 --quant q4 --cpu-offload",
+		"proof:check":   "node tools/proof-check.js",
+		"gate:left":     "node tools/gate-left.js",
+		"gate:right":    "node tools/gate-right.js",
+		"audit:ext":     "node tools/audit_external.js",
+		"chunk:run":     "node tools/run_chunk.js"
+	},
+	"devDependencies": {
+		"ajv": "^8.17.1"
+	}
+}
