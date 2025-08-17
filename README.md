@@ -38,5 +38,5 @@
 3) ビルド: `pnpm -s build || echo "skipped build"`
 4) 右ゲート: ダミーJSONをパイプしてスキーマ＋品質検証
 5) 監査: `node tools/audit_external.js || echo "audit warnings"`
-
+<!-- trigger CI -->
 
